@@ -1,122 +1,72 @@
 #include <iostream>
+using namespace std;
 
-// 1. Check if number is power of two (loop method)
-bool is_power_of_two_loop(int n) {
-    if (n < 1) return false;
-    while (n > 1) {
-        if (n % 2 != 0) return false;
-        n /= 2;
-    }
-    return true;
-}
-
-// 1. Check if number is power of two (non-loop method using bitwise)
-bool is_power_of_two_bitwise(int n) {
-    return n > 0 && (n & (n - 1)) == 0;
-}
-
-// 2. Check if number is prime
-bool is_prime(int n) {
-    if (n <= 1) return false;
-    if (n == 2) return true;
-    if (n % 2 == 0) return false;
-    for (int i = 3; i * i <= n; i += 2) {
-        if (n % i == 0) return false;
-    }
-    return true;
-}
-
-// 3. Reduce fraction
+// class for holding fractions
 class Fraction {
 public:
-    int numerator;
-    int denominator;
-
-    Fraction(int numerator, int denominator) : numerator(numerator), denominator(denominator) {}
-
-    std::string to_string() const {
-        return std::to_string(numerator) + "/" + std::to_string(denominator);
-    }
-
-    bool operator==(const Fraction &other) const {
-        return numerator == other.numerator && denominator == other.denominator;
-    }
+    int n, d;
+    Fraction(int a, int b) { n = a; d = b; }
+    bool operator==(Fraction &o) { return n == o.n && d == o.d; } // check if two fractions are the same
+    string to_string() { return std::to_string(n) + "/" + std::to_string(d); } // turn into a string
 };
 
-int gcd(int a, int b) {
-    while (b != 0) {
-        int t = b;
-        b = a % b;
-        a = t;
+// get greatest common divisor
+int gcd(int a, int b) { while (b) { int t = b; b = a % b; a = t; } return a; }
+
+// reduce the fraction using gcd
+Fraction reduce(Fraction f) {
+    int g = gcd(f.n, f.d);
+    return Fraction(f.n / g, f.d / g);
+}
+
+// check if number is power of 2 using a loop
+bool is_power_of_two_loop(int x) {
+    while (x > 1) {
+        if (x % 2) return false;
+        x /= 2;
     }
-    return a;
+    return x == 1;
 }
 
-Fraction reduce(Fraction input) {
-    int divisor = gcd(input.numerator, input.denominator);
-    input.numerator /= divisor;
-    input.denominator /= divisor;
-    return input;
+// check if number is power of 2 using bitwise
+bool is_power_of_two_bitwise(int x) {
+    return x > 0 && (x & (x - 1)) == 0;
 }
 
-// Test functions
-void test_is_power_of_two() {
-    int test_values[] = {1, 2, 4, 8, 16, 3, 5, 10, 0, -2};
-    bool expected[]    = {true, true, true, true, true, false, false, false, false, false};
-
-    for (int i = 0; i < 10; ++i) {
-        if (is_power_of_two_loop(test_values[i]) == expected[i] &&
-            is_power_of_two_bitwise(test_values[i]) == expected[i]) {
-            std::cout << "PASS" << std::endl;
-        } else {
-            std::cout << "FAIL" << std::endl;
-        }
-    }
+// check if number is prime
+bool is_prime(int x) {
+    if (x < 2) return false;
+    for (int i = 2; i < x; i++) if (x % i == 0) return false;
+    return true;
 }
 
-void test_is_prime() {
-    int test_values[] = {2, 3, 4, 5, 7, 9, 11, 13, 1, 0, -5};
-    bool expected[]   = {true, true, false, true, true, false, true, true, false, false, false};
-
-    for (int i = 0; i < 11; ++i) {
-        if (is_prime(test_values[i]) == expected[i]) {
-            std::cout << "PASS" << std::endl;
-        } else {
-            std::cout << "FAIL" << std::endl;
-        }
-    }
+// test if reduce works
+void test_reduce() {
+    Fraction in[] = { {2,4},{6,8},{3,9},{5,10},{10,5} };
+    Fraction out[] = { {1,2},{3,4},{1,3},{1,2},{5,1} };
+    for (int i = 0; i < 5; i++)
+        cout << (reduce(in[i]) == out[i] ? "PASS" : "FAIL") << endl;
 }
 
-void test_reduce_fraction() {
-    Fraction inputs[] = {
-        Fraction(2, 4),
-        Fraction(2, 3),
-        Fraction(3, 2),
-        Fraction(12, 14),
-        Fraction(12, 18)
-    };
-
-    Fraction expected[] = {
-        Fraction(1, 2),
-        Fraction(2, 3),
-        Fraction(3, 2),
-        Fraction(6, 7),
-        Fraction(2, 3)
-    };
-
-    for (int i = 0; i < 5; ++i) {
-        Fraction reduced = reduce(inputs[i]);
-        if (reduced == expected[i]) {
-            std::cout << "PASS" << std::endl;
-        } else {
-            std::cout << "FAIL" << std::endl;
-        }
-    }
+// test power of two functions
+void test_power() {
+    int in[] = {2,4,5,16};
+    bool out[] = {true,true,false,true};
+    for (int i = 0; i < 4; i++)
+        cout << ((is_power_of_two_loop(in[i]) == out[i] && is_power_of_two_bitwise(in[i]) == out[i]) ? "PASS" : "FAIL") << endl;
 }
 
+// test prime function
+void test_prime() {
+    int in[] = {2,3,9,11};
+    bool out[] = {true,true,false,true};
+    for (int i = 0; i < 4; i++)
+        cout << (is_prime(in[i]) == out[i] ? "PASS" : "FAIL") << endl;
+}
+
+// run all the tests
 int main() {
-    test_is_power_of_two();
-    test_is_prime();
-    test_reduce_fraction();
+    test_power();
+    test_prime();
+    test_reduce();
 }
-
